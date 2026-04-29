@@ -69,6 +69,54 @@ response = await agent.run("我刚才说了什么？", conversation_id="session-
 # 第二轮会带上第一轮的上下文
 ```
 
+### 从 JSON 文件加载配置
+
+```json
+{
+  "model": "gpt-4o",
+  "system_prompt": "你是一个编程助手",
+  "mcp_servers": [
+    {"command": "npx", "args": ["-y", "@anthropic/mcp-server-filesystem", "/tmp"]},
+    {"url": "http://localhost:8080/sse"}
+  ]
+}
+```
+
+```python
+config = AgentConfig.from_json("agent-config.json")
+agent = Agent(config)
+```
+
+JSON 中 `mcp_servers` 根据 `command`（stdio）或 `url`（SSE）自动识别类型。
+
+### 从环境变量加载配置
+
+```bash
+export VIBE_MODEL=gpt-4o
+export VIBE_SYSTEM_PROMPT="你是一个助手"
+export VIBE_MAX_ITERATIONS=30
+export VIBE_MCP_SERVERS='[{"command":"npx","args":["server"]}]'
+```
+
+```python
+config = AgentConfig.from_env()          # 默认 VIBE_ 前缀
+config = AgentConfig.from_env(prefix="MYAPP_")  # 自定义前缀
+agent = Agent(config)
+```
+
+支持的环境变量：
+
+| 变量 | 类型 | 说明 |
+| ---- | ---- | ---- |
+| `VIBE_MODEL` | str | 模型名称 |
+| `VIBE_API_KEY` | str | API 密钥（优先级高于 `OPENAI_API_KEY`） |
+| `VIBE_BASE_URL` | str | 自定义 API endpoint |
+| `VIBE_SYSTEM_PROMPT` | str | 系统提示词 |
+| `VIBE_MAX_ITERATIONS` | int | 最大工具调用轮次 |
+| `VIBE_TOOL_TIMEOUT` | float | 工具调用超时（秒） |
+| `VIBE_MCP_SERVERS` | JSON | MCP server 列表 |
+| `VIBE_DEFAULT_HEADERS` | JSON | 自定义请求头 |
+
 ### 连接 MCP Server
 
 ```python

@@ -1,0 +1,159 @@
+import json
+import pytest
+from vibe_agent.config import AgentConfig, MCPServerStdio, MCPServerSSE
+
+
+class TestFromJson:
+    def test_basic_fields(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "model": "gpt-4.1",
+            "api_key": "sk-test",
+            "system_prompt": "You are helpful.",
+            "max_iterations": 30,
+            "tool_timeout": 45.0,
+        }))
+        config = AgentConfig.from_json(str(config_file))
+
+        assert config.model == "gpt-4.1"
+        assert config.api_key == "sk-test"
+        assert config.system_prompt == "You are helpful."
+        assert config.max_iterations == 30
+        assert config.tool_timeout == 45.0
+
+    def test_mcp_stdio(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "mcp_servers": [
+                {"command": "npx", "args": ["-y", "some-server"], "env": {"FOO": "bar"}},
+            ],
+        }))
+        config = AgentConfig.from_json(str(config_file))
+
+        assert len(config.mcp_servers) == 1
+        server = config.mcp_servers[0]
+        assert isinstance(server, MCPServerStdio)
+        assert server.command == "npx"
+        assert server.args == ["-y", "some-server"]
+        assert server.env == {"FOO": "bar"}
+
+    def test_mcp_sse(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "mcp_servers": [
+                {"url": "http://localhost:8080/sse", "headers": {"Auth": "token"}},
+            ],
+        }))
+        config = AgentConfig.from_json(str(config_file))
+
+        assert len(config.mcp_servers) == 1
+        server = config.mcp_servers[0]
+        assert isinstance(server, MCPServerSSE)
+        assert server.url == "http://localhost:8080/sse"
+        assert server.headers == {"Auth": "token"}
+
+    def test_mcp_mixed(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "mcp_servers": [
+                {"command": "npx", "args": ["server-a"]},
+                {"url": "http://localhost:9000/sse"},
+            ],
+        }))
+        config = AgentConfig.from_json(str(config_file))
+
+        assert len(config.mcp_servers) == 2
+        assert isinstance(config.mcp_servers[0], MCPServerStdio)
+        assert isinstance(config.mcp_servers[1], MCPServerSSE)
+
+    def test_unknown_keys_ignored(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "model": "gpt-4o",
+            "unknown_field": "should be ignored",
+            "another_extra": 42,
+        }))
+        config = AgentConfig.from_json(str(config_file))
+        assert config.model == "gpt-4o"
+
+    def test_missing_api_key_falls_back_to_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-from-env")
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"model": "gpt-4o"}))
+        config = AgentConfig.from_json(str(config_file))
+
+        assert config.api_key == "sk-from-env"
+
+    def test_empty_file_uses_defaults(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text("{}")
+        config = AgentConfig.from_json(str(config_file))
+
+        assert config.model == "gpt-4o"
+        assert config.max_iterations == 20
+        assert config.mcp_servers == []
+
+
+class TestFromEnv:
+    def test_string_fields(self, monkeypatch):
+        monkeypatch.setenv("VIBE_MODEL", "gpt-4.1")
+        monkeypatch.setenv("VIBE_API_KEY", "sk-test")
+        monkeypatch.setenv("VIBE_BASE_URL", "https://api.example.com")
+        monkeypatch.setenv("VIBE_SYSTEM_PROMPT", "Be concise.")
+        config = AgentConfig.from_env()
+
+        assert config.model == "gpt-4.1"
+        assert config.api_key == "sk-test"
+        assert config.base_url == "https://api.example.com"
+        assert config.system_prompt == "Be concise."
+
+    def test_numeric_coercion(self, monkeypatch):
+        monkeypatch.setenv("VIBE_MAX_ITERATIONS", "30")
+        monkeypatch.setenv("VIBE_TOOL_TIMEOUT", "45.5")
+        config = AgentConfig.from_env()
+
+        assert config.max_iterations == 30
+        assert isinstance(config.max_iterations, int)
+        assert config.tool_timeout == 45.5
+        assert isinstance(config.tool_timeout, float)
+
+    def test_mcp_servers_json(self, monkeypatch):
+        monkeypatch.setenv("VIBE_MCP_SERVERS", json.dumps([
+            {"command": "npx", "args": ["server"]},
+            {"url": "http://localhost:8080/sse"},
+        ]))
+        config = AgentConfig.from_env()
+
+        assert len(config.mcp_servers) == 2
+        assert isinstance(config.mcp_servers[0], MCPServerStdio)
+        assert isinstance(config.mcp_servers[1], MCPServerSSE)
+
+    def test_default_headers_json(self, monkeypatch):
+        monkeypatch.setenv("VIBE_DEFAULT_HEADERS", json.dumps({"X-Custom": "value"}))
+        config = AgentConfig.from_env()
+
+        assert config.default_headers == {"X-Custom": "value"}
+
+    def test_custom_prefix(self, monkeypatch):
+        monkeypatch.setenv("MYAPP_MODEL", "gpt-4.1-mini")
+        monkeypatch.setenv("MYAPP_API_KEY", "sk-myapp")
+        config = AgentConfig.from_env(prefix="MYAPP_")
+
+        assert config.model == "gpt-4.1-mini"
+        assert config.api_key == "sk-myapp"
+
+    def test_no_vars_returns_defaults(self, monkeypatch):
+        for key in list(monkeypatch._env if hasattr(monkeypatch, '_env') else {}):
+            if key.startswith("VIBE_"):
+                monkeypatch.delenv(key, raising=False)
+        config = AgentConfig.from_env()
+
+        assert config.model == "gpt-4o"
+        assert config.max_iterations == 20
+        assert config.mcp_servers == []
+
+    def test_api_key_fallback_to_openai_env(self, monkeypatch):
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-openai-fallback")
+        config = AgentConfig.from_env()
+
+        assert config.api_key == "sk-openai-fallback"

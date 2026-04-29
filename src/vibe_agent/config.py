@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass, field
 from typing import Any
@@ -25,6 +26,23 @@ class SubagentConfig:
     inherit_tools: bool = True
 
 
+def _parse_mcp_server(data: dict[str, Any]) -> MCPServerStdio | MCPServerSSE:
+    if "command" in data:
+        return MCPServerStdio(
+            command=data["command"],
+            args=data.get("args", []),
+            env=data.get("env"),
+        )
+    if "url" in data:
+        return MCPServerSSE(
+            url=data["url"],
+            headers=data.get("headers"),
+        )
+    raise ValueError(
+        f"Cannot determine MCP server type: need 'command' (stdio) or 'url' (sse), got keys {list(data.keys())}"
+    )
+
+
 @dataclass
 class AgentConfig:
     model: str = "gpt-4o"
@@ -39,3 +57,42 @@ class AgentConfig:
     def __post_init__(self):
         if self.api_key is None:
             self.api_key = os.environ.get("OPENAI_API_KEY")
+
+    @classmethod
+    def from_json(cls, path: str) -> AgentConfig:
+        with open(path) as f:
+            data = json.load(f)
+
+        mcp_servers = [_parse_mcp_server(s) for s in data.pop("mcp_servers", [])]
+        field_names = {f.name for f in cls.__dataclass_fields__.values()}
+        kwargs = {k: v for k, v in data.items() if k in field_names}
+
+        return cls(mcp_servers=mcp_servers, **kwargs)
+
+    @classmethod
+    def from_env(cls, prefix: str = "VIBE_") -> AgentConfig:
+        kwargs: dict[str, Any] = {}
+
+        env_map: dict[str, tuple[str, type]] = {
+            f"{prefix}MODEL": ("model", str),
+            f"{prefix}API_KEY": ("api_key", str),
+            f"{prefix}BASE_URL": ("base_url", str),
+            f"{prefix}SYSTEM_PROMPT": ("system_prompt", str),
+            f"{prefix}MAX_ITERATIONS": ("max_iterations", int),
+            f"{prefix}TOOL_TIMEOUT": ("tool_timeout", float),
+        }
+
+        for env_key, (field_name, type_) in env_map.items():
+            value = os.environ.get(env_key)
+            if value is not None:
+                kwargs[field_name] = type_(value)
+
+        mcp_raw = os.environ.get(f"{prefix}MCP_SERVERS")
+        if mcp_raw:
+            kwargs["mcp_servers"] = [_parse_mcp_server(s) for s in json.loads(mcp_raw)]
+
+        headers_raw = os.environ.get(f"{prefix}DEFAULT_HEADERS")
+        if headers_raw:
+            kwargs["default_headers"] = json.loads(headers_raw)
+
+        return cls(**kwargs)
