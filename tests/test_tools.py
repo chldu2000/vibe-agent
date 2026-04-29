@@ -1,0 +1,95 @@
+import pytest
+from vibe_agent.tools.registry import ToolRegistry
+
+
+def test_register_and_get_openai_tools():
+    registry = ToolRegistry()
+
+    async def add(a: int, b: int) -> int:
+        return a + b
+
+    registry.register(add, name="add", description="Add two numbers")
+    tools = registry.get_openai_tools()
+    assert len(tools) == 1
+    assert tools[0]["type"] == "function"
+    assert tools[0]["function"]["name"] == "add"
+    assert tools[0]["function"]["description"] == "Add two numbers"
+    assert tools[0]["function"]["parameters"]["type"] == "object"
+    assert "a" in tools[0]["function"]["parameters"]["properties"]
+    assert "b" in tools[0]["function"]["parameters"]["properties"]
+
+
+def test_register_detects_required_params():
+    registry = ToolRegistry()
+
+    async def greet(name: str, greeting: str = "Hello") -> str:
+        return f"{greeting}, {name}"
+
+    registry.register(greet, name="greet", description="Greet someone")
+    params = registry.get_openai_tools()[0]["function"]["parameters"]
+    assert "name" in params["required"]
+    assert "greeting" not in params["required"]
+
+
+@pytest.mark.asyncio
+async def test_execute_local_tool():
+    registry = ToolRegistry()
+
+    async def add(a: int, b: int) -> int:
+        return a + b
+
+    registry.register(add, name="add", description="Add two numbers")
+    result = await registry.execute("add", '{"a": 3, "b": 5}')
+    assert result == "8"
+
+
+@pytest.mark.asyncio
+async def test_execute_unknown_tool_raises():
+    registry = ToolRegistry()
+    with pytest.raises(KeyError, match="unknown"):
+        await registry.execute("unknown", "{}")
+
+
+def test_register_mcp_tool():
+    registry = ToolRegistry()
+
+    async def handler(arguments: dict) -> str:
+        return "result"
+
+    registry.register_mcp_tool(
+        name="mcp_read",
+        description="Read via MCP",
+        parameters={"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]},
+        handler=handler,
+    )
+    tools = registry.get_openai_tools()
+    assert len(tools) == 1
+    assert tools[0]["function"]["name"] == "mcp_read"
+
+
+@pytest.mark.asyncio
+async def test_execute_mcp_tool():
+    registry = ToolRegistry()
+
+    async def handler(arguments: dict) -> str:
+        return f"read {arguments['path']}"
+
+    registry.register_mcp_tool(
+        name="mcp_read",
+        description="Read via MCP",
+        parameters={"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]},
+        handler=handler,
+    )
+    result = await registry.execute("mcp_read", '{"path": "/tmp/a"}')
+    assert result == "read /tmp/a"
+
+
+def test_has_tool():
+    registry = ToolRegistry()
+
+    async def noop() -> str:
+        return ""
+
+    registry.register(noop, name="noop", description="Does nothing")
+    assert registry.has_tool("noop")
+    assert not registry.has_tool("missing")
