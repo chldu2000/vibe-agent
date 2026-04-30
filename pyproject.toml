@@ -1,7 +1,8 @@
 [project]
 name = "air-agent"
-version = "0.1.0"
+version = "0.1.1"
 description = "Lightweight Python AI agent with OpenAI tool calling, MCP support, and parallel subagents"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "openai>=1.30",
