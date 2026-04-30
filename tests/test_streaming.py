@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from vibe_agent.agent import Agent
-from vibe_agent.config import AgentConfig
+from air_agent.agent import Agent
+from air_agent.config import AgentConfig
 
 
 def _mock_stream_chunk(content=None, tool_calls=None, finish_reason=None, usage=None):

@@ -1,9 +1,9 @@
 import json
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from vibe_agent.agent import Agent
-from vibe_agent.config import AgentConfig
-from vibe_agent.types import Response
+from air_agent.agent import Agent
+from air_agent.config import AgentConfig
+from air_agent.types import Response
 
 
 def _mock_openai_response(content: str, tool_calls=None, usage=None):

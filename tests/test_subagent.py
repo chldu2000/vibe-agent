@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from vibe_agent.agent import Agent
-from vibe_agent.config import AgentConfig, SubagentConfig
-from vibe_agent.types import SubagentResult
+from air_agent.agent import Agent
+from air_agent.config import AgentConfig, SubagentConfig
+from air_agent.types import SubagentResult
 
 
 def _mock_response(content: str):

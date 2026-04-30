@@ -1,5 +1,5 @@
 import pytest
-from vibe_agent.tools.registry import ToolRegistry
+from air_agent.tools.registry import ToolRegistry
 
 
 def test_register_and_get_openai_tools():

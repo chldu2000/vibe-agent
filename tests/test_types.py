@@ -1,5 +1,5 @@
 import pytest
-from vibe_agent.types import Response, StreamEvent, SubagentResult
+from air_agent.types import Response, StreamEvent, SubagentResult
 
 
 def test_response_creation():

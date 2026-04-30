@@ -1,4 +1,4 @@
-from vibe_agent.mcp.tool_adapter import mcp_tool_to_openai
+from air_agent.mcp.tool_adapter import mcp_tool_to_openai
 
 
 def test_mcp_tool_to_openai():

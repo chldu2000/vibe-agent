@@ -1,6 +1,6 @@
 import json
 import pytest
-from vibe_agent.config import AgentConfig, MCPServerStdio, MCPServerSSE
+from air_agent.config import AgentConfig, MCPServerStdio, MCPServerSSE
 
 
 class TestFromJson:
