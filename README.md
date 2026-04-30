@@ -1,14 +1,14 @@
 # air-agent
 
-轻量级 Python AI Agent 库。基于 OpenAI Chat Completions API，支持工具调用循环、MCP Server 连接、并行 Subagent 和流式输出。设计为可被其他 Python 项目直接引用。
+A lightweight Python AI Agent library. Built on the OpenAI Chat Completions API with support for tool-calling loops, MCP Server connections, parallel subagents, and streaming output. Designed to be imported directly by other Python projects.
 
-## 安装
+## Installation
 
 ```bash
 uv add air-agent
 ```
 
-或开发模式：
+Or in development mode:
 
 ```bash
 git clone https://github.com/chldu2000/air-agent.git
@@ -16,9 +16,9 @@ cd air-agent
 uv sync --group dev
 ```
 
-## 快速开始
+## Quick Start
 
-### 基础对话
+### Basic Conversation
 
 ```python
 import asyncio
@@ -26,55 +26,55 @@ from vibe_agent import Agent, AgentConfig
 
 async def main():
     agent = Agent(AgentConfig(model="gpt-4o"))
-    response = await agent.run("用一句话解释量子计算")
+    response = await agent.run("Explain quantum computing in one sentence")
     print(response.content)
 
 asyncio.run(main())
 ```
 
-### 注册本地工具
+### Register Local Tools
 
 ```python
 agent = Agent(AgentConfig(model="gpt-4o", api_key="sk-xxx"))
 
-@agent.tool(name="add", description="计算两个数的和")
+@agent.tool(name="add", description="Calculate the sum of two numbers")
 async def add(a: int, b: int) -> int:
     return a + b
 
-response = await agent.run("3 加 5 等于多少？")
-# Agent 会自动调用 add 工具并返回结果
+response = await agent.run("What is 3 plus 5?")
+# The agent will automatically call the add tool and return the result
 ```
 
-参数类型从函数签名自动推导，生成 OpenAI tool calling 所需的 JSON Schema。
+Parameter types are inferred from the function signature and converted to the JSON Schema required by OpenAI tool calling.
 
-### 流式输出
+### Streaming Output
 
 ```python
-async for event in await agent.run("写一首关于编程的诗", stream=True):
+async for event in await agent.run("Write a poem about programming", stream=True):
     if event.type == "text":
         print(event.content, end="", flush=True)
     elif event.type == "tool_call":
-        print(f"\n[调用工具: {event.name}]")
+        print(f"\n[Calling tool: {event.name}]")
     elif event.type == "tool_result":
-        print(f"[工具结果: {event.content}]")
+        print(f"[Tool result: {event.content}]")
     elif event.type == "done":
-        print(f"\n完成，token 用量: {event.usage}")
+        print(f"\nDone, token usage: {event.usage}")
 ```
 
-### 多轮对话
+### Multi-turn Conversation
 
 ```python
-response = await agent.run("你好", conversation_id="session-1")
-response = await agent.run("我刚才说了什么？", conversation_id="session-1")
-# 第二轮会带上第一轮的上下文
+response = await agent.run("Hello", conversation_id="session-1")
+response = await agent.run("What did I just say?", conversation_id="session-1")
+# The second turn includes context from the first turn
 ```
 
-### 从 JSON 文件加载配置
+### Load Configuration from JSON
 
 ```json
 {
   "model": "gpt-4o",
-  "system_prompt": "你是一个编程助手",
+  "system_prompt": "You are a coding assistant",
   "mcp_servers": [
     {"command": "npx", "args": ["-y", "@anthropic/mcp-server-filesystem", "/tmp"]},
     {"url": "http://localhost:8080/sse"}
@@ -87,37 +87,37 @@ config = AgentConfig.from_json("agent-config.json")
 agent = Agent(config)
 ```
 
-JSON 中 `mcp_servers` 根据 `command`（stdio）或 `url`（SSE）自动识别类型。
+The `mcp_servers` field auto-detects the transport type based on `command` (stdio) or `url` (SSE).
 
-### 从环境变量加载配置
+### Load Configuration from Environment Variables
 
 ```bash
 export VIBE_MODEL=gpt-4o
-export VIBE_SYSTEM_PROMPT="你是一个助手"
+export VIBE_SYSTEM_PROMPT="You are an assistant"
 export VIBE_MAX_ITERATIONS=30
 export VIBE_MCP_SERVERS='[{"command":"npx","args":["server"]}]'
 ```
 
 ```python
-config = AgentConfig.from_env()          # 默认 VIBE_ 前缀
-config = AgentConfig.from_env(prefix="MYAPP_")  # 自定义前缀
+config = AgentConfig.from_env()          # default VIBE_ prefix
+config = AgentConfig.from_env(prefix="MYAPP_")  # custom prefix
 agent = Agent(config)
 ```
 
-支持的环境变量：
+Supported environment variables:
 
-| 变量 | 类型 | 说明 |
+| Variable | Type | Description |
 | ---- | ---- | ---- |
-| `VIBE_MODEL` | str | 模型名称 |
-| `VIBE_API_KEY` | str | API 密钥（优先级高于 `OPENAI_API_KEY`） |
-| `VIBE_BASE_URL` | str | 自定义 API endpoint |
-| `VIBE_SYSTEM_PROMPT` | str | 系统提示词 |
-| `VIBE_MAX_ITERATIONS` | int | 最大工具调用轮次 |
-| `VIBE_TOOL_TIMEOUT` | float | 工具调用超时（秒） |
-| `VIBE_MCP_SERVERS` | JSON | MCP server 列表 |
-| `VIBE_DEFAULT_HEADERS` | JSON | 自定义请求头 |
+| `VIBE_MODEL` | str | Model name |
+| `VIBE_API_KEY` | str | API key (takes precedence over `OPENAI_API_KEY`) |
+| `VIBE_BASE_URL` | str | Custom API endpoint |
+| `VIBE_SYSTEM_PROMPT` | str | System prompt |
+| `VIBE_MAX_ITERATIONS` | int | Max tool-calling rounds |
+| `VIBE_TOOL_TIMEOUT` | float | Tool call timeout in seconds |
+| `VIBE_MCP_SERVERS` | JSON | MCP server list |
+| `VIBE_DEFAULT_HEADERS` | JSON | Custom request headers |
 
-### 连接 MCP Server
+### Connect to MCP Servers
 
 ```python
 from vibe_agent import MCPServerStdio, MCPServerSSE
@@ -130,22 +130,22 @@ agent = Agent(AgentConfig(
     ],
 ))
 
-async with agent:  # 自动连接/断开 MCP server
-    response = await agent.run("列出 /tmp 下的文件")
+async with agent:  # auto connect/disconnect MCP servers
+    response = await agent.run("List files under /tmp")
 ```
 
-支持 stdio 和 StreamableHTTP 两种 MCP transport。连接 MCP 后，server 暴露的工具会自动注册到 Agent 的工具列表中。
+Supports both stdio and StreamableHTTP MCP transports. Once connected, tools exposed by the server are automatically registered in the agent's tool list.
 
-### 并行 Subagent
+### Parallel Subagents
 
 ```python
 from vibe_agent import SubagentConfig
 
 results = await agent.delegate(
     tasks=[
-        "分析 src/ 目录的代码结构",
-        "检查 tests/ 的测试覆盖率",
-        "生成 CHANGELOG",
+        "Analyze the code structure in src/",
+        "Check test coverage in tests/",
+        "Generate a CHANGELOG",
     ],
     config=SubagentConfig(max_parallel=3, timeout=60),
 )
@@ -154,46 +154,46 @@ for r in results:
     print(f"[{r.status}] {r.content[:100]}")
 ```
 
-每个 task 在独立的 Agent 实例中运行，互不干扰。
+Each task runs in an independent Agent instance without interference.
 
-## 配置
+## Configuration
 
 ```python
 AgentConfig(
-    model="gpt-4o",              # 模型名称
-    api_key="sk-xxx",            # 或设置 OPENAI_API_KEY 环境变量
-    base_url=None,               # 自定义 API endpoint
-    system_prompt="你是一个助手",  # 系统提示词
-    max_iterations=20,           # 工具调用最大轮次
-    tool_timeout=30.0,           # 单次工具调用超时（秒）
-    mcp_servers=[],              # MCP server 列表
+    model="gpt-4o",              # Model name
+    api_key="sk-xxx",            # Or set OPENAI_API_KEY env variable
+    base_url=None,               # Custom API endpoint
+    system_prompt="You are an assistant",  # System prompt
+    max_iterations=20,           # Max tool-calling rounds
+    tool_timeout=30.0,           # Single tool call timeout (seconds)
+    mcp_servers=[],              # MCP server list
 )
 ```
 
-## 项目结构
+## Project Structure
 
 ```text
 src/vibe_agent/
-├── __init__.py          # 公开 API 导出
-├── agent.py             # 核心 Agent（ReAct 循环 + 流式输出）
-├── config.py            # 配置数据类
+├── __init__.py          # Public API exports
+├── agent.py             # Core Agent (ReAct loop + streaming)
+├── config.py            # Configuration dataclass
 ├── types.py             # Response, StreamEvent, SubagentResult
 ├── tools/
-│   ├── base.py          # Tool 数据类
-│   └── registry.py      # 工具注册中心
+│   ├── base.py          # Tool dataclass
+│   └── registry.py      # Tool registry
 ├── mcp/
-│   ├── client.py        # MCP 客户端（stdio + streamable_http）
-│   └── tool_adapter.py  # MCP tool → OpenAI 格式转换
-└── subagent.py          # 并行 subagent 管理器
+│   ├── client.py        # MCP client (stdio + streamable_http)
+│   └── tool_adapter.py  # MCP tool → OpenAI format adapter
+└── subagent.py          # Parallel subagent manager
 ```
 
-## 依赖
+## Dependencies
 
-- `openai` — LLM 调用与 tool calling
-- `mcp` — MCP 协议客户端
-- `pydantic` — 数据校验
+- `openai` — LLM calls and tool calling
+- `mcp` — MCP protocol client
+- `pydantic` — Data validation
 
-## 开发
+## Development
 
 ```bash
 uv sync --group dev
