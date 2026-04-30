@@ -6,11 +6,11 @@ from typing import Any, AsyncIterator
 
 from openai import AsyncOpenAI
 
-from vibe_agent.config import AgentConfig, SubagentConfig
-from vibe_agent.mcp.client import MCPClient
-from vibe_agent.subagent import delegate as _delegate
-from vibe_agent.tools.registry import ToolRegistry
-from vibe_agent.types import Response, StreamEvent, SubagentResult, TokenUsage
+from air_agent.config import AgentConfig, SubagentConfig
+from air_agent.mcp.client import MCPClient
+from air_agent.subagent import delegate as _delegate
+from air_agent.tools.registry import ToolRegistry
+from air_agent.types import Response, StreamEvent, SubagentResult, TokenUsage
 
 logger = logging.getLogger(__name__)
 

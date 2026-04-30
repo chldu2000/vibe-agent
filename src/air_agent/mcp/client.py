@@ -9,7 +9,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
-from vibe_agent.config import MCPServerStdio, MCPServerSSE
+from air_agent.config import MCPServerStdio, MCPServerSSE
 
 logger = logging.getLogger(__name__)
 

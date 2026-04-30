@@ -1,5 +1,5 @@
 [project]
-name = "vibe-agent"
+name = "air-agent"
 version = "0.1.0"
 description = "Lightweight Python AI agent with OpenAI tool calling, MCP support, and parallel subagents"
 requires-python = ">=3.11"

@@ -1,18 +1,18 @@
-# vibe-agent
+# air-agent
 
 轻量级 Python AI Agent 库。基于 OpenAI Chat Completions API，支持工具调用循环、MCP Server 连接、并行 Subagent 和流式输出。设计为可被其他 Python 项目直接引用。
 
 ## 安装
 
 ```bash
-uv add vibe-agent
+uv add air-agent
 ```
 
 或开发模式：
 
 ```bash
-git clone https://github.com/chldu2000/vibe-agent.git
-cd vibe-agent
+git clone https://github.com/chldu2000/air-agent.git
+cd air-agent
 uv sync --group dev
 ```
 

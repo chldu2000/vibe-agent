@@ -4,8 +4,8 @@ import asyncio
 import logging
 from typing import Any
 
-from vibe_agent.config import SubagentConfig
-from vibe_agent.types import SubagentResult
+from air_agent.config import SubagentConfig
+from air_agent.types import SubagentResult
 
 logger = logging.getLogger(__name__)
 

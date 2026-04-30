@@ -4,7 +4,7 @@ import inspect
 import json
 from typing import Any, Callable, Awaitable
 
-from vibe_agent.tools.base import Tool
+from air_agent.tools.base import Tool
 
 
 def _python_type_to_json_schema(annotation: Any) -> dict[str, Any]:
