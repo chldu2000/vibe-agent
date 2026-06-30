@@ -1,6 +1,6 @@
 [project]
 name = "air-agent"
-version = "0.8.1"
+version = "1.0.0"
 description = "Lightweight Python AI agent with OpenAI tool calling, MCP support, and parallel subagents"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,6 +23,15 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["air_agent"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = false
 
 [build-system]
 requires = ["hatchling"]
