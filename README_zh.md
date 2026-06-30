@@ -4,6 +4,10 @@
 
 轻量级 Python AI Agent 库。默认使用 OpenAI Provider，同时支持自定义 LLM Provider；支持默认 ReAct 与可选 Plan-and-Execute 策略，内置工具调用循环、文件/Shell 工具、MCP Server 连接、Skills、并行 Subagent、Tracing 和流式输出。设计为可被其他 Python 项目直接引用。
 
+## API 稳定性
+
+v1.0 将 `Agent`、`AgentConfig`、本地工具、MCP 配置、Provider、Memory、Planner、tracing 事件和公开错误标记为 Stable API。插件和高级多 Agent 仲裁仍为 Experimental。详见 [API Stability And Semver Policy](docs/api-stability.md)。
+
 ## 安装
 
 ```bash

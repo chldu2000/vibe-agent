@@ -4,6 +4,10 @@
 
 A lightweight Python AI Agent library with OpenAI as the default provider, plus custom LLM provider support. It includes ReAct and opt-in Plan-and-Execute strategies, tool-calling loops, built-in file/shell tools, MCP server connections, skills, parallel subagents, tracing, and streaming output. Designed to be imported directly by other Python projects.
 
+## API Stability
+
+v1.0 marks `Agent`, `AgentConfig`, local tools, MCP config, Provider, Memory, Planner, tracing events, and public errors as Stable APIs. Plugins and advanced multi-agent arbitration remain Experimental. See [API Stability And Semver Policy](docs/api-stability.md).
+
 ## Installation
 
 ```bash
