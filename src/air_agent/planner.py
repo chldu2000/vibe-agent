@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Literal, Protocol
 
+from air_agent.errors import PlannerError
 from air_agent.providers import LLMProvider
 
 PlanStepStatus = Literal["pending", "running", "success", "error", "skipped"]
@@ -130,23 +131,23 @@ class LLMPlanner:
         data = self._parse_plan_json(response.content)
         raw_steps = data.get("steps")
         if not isinstance(raw_steps, list):
-            raise ValueError("planner response must contain a steps list")
+            raise PlannerError("planner response must contain a steps list")
         if not raw_steps:
-            raise ValueError("planner response must contain at least one step")
+            raise PlannerError("planner response must contain at least one step")
 
         steps: list[PlanStep] = []
         for index, raw_step in enumerate(raw_steps[: self.max_steps], start=1):
             if not isinstance(raw_step, dict):
-                raise ValueError(f"plan step {index} must be an object")
+                raise PlannerError(f"plan step {index} must be an object")
             step_id = raw_step.get("id")
             description = raw_step.get("description")
             dependencies = raw_step.get("dependencies", [])
             if not isinstance(step_id, str) or not step_id.strip():
-                raise ValueError(f"plan step {index} must include a non-empty id")
+                raise PlannerError(f"plan step {index} must include a non-empty id")
             if not isinstance(description, str) or not description.strip():
-                raise ValueError(f"plan step {step_id} must include a non-empty description")
+                raise PlannerError(f"plan step {step_id} must include a non-empty description")
             if not isinstance(dependencies, list) or not all(isinstance(item, str) for item in dependencies):
-                raise ValueError(f"plan step {step_id} dependencies must be a list of strings")
+                raise PlannerError(f"plan step {step_id} dependencies must be a list of strings")
             steps.append(
                 PlanStep(
                     id=step_id.strip(),
@@ -204,9 +205,9 @@ class LLMPlanner:
         try:
             data = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise ValueError(f"planner response is not valid JSON: {exc.msg}") from exc
+            raise PlannerError(f"planner response is not valid JSON: {exc.msg}") from exc
         if not isinstance(data, dict):
-            raise ValueError("planner response must be a JSON object")
+            raise PlannerError("planner response must be a JSON object")
         return data
 
 

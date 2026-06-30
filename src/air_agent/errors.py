@@ -33,7 +33,7 @@ class MemoryError(AirAgentError, RuntimeError):
     """Raised when memory operations fail."""
 
 
-class PlannerError(AirAgentError, RuntimeError):
+class PlannerError(AirAgentError, ValueError):
     """Raised when planning fails."""
 
 

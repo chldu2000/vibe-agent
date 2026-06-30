@@ -10,6 +10,7 @@ from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
 from air_agent.config import MCPServerStdio, MCPServerSSE
+from air_agent.errors import MCPConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +39,10 @@ class MCPClient:
             self._session = await self._enter(ClientSession(read, write))
             await self._session.initialize()
             logger.info("Connected to MCP server: %s", self._config)
-        except Exception:
+        except Exception as exc:
             logger.warning("Failed to connect to MCP server: %s", self._config, exc_info=True)
             await self.disconnect()
-            raise
+            raise MCPConnectionError(f"Failed to connect to MCP server: {self._config}") from exc
 
     async def _enter(self, cm: Any) -> Any:
         if self._cm_stack is None:
@@ -63,14 +64,14 @@ class MCPClient:
 
     async def call_tool(self, name: str, arguments: dict[str, Any]) -> str:
         if self._session is None:
-            raise RuntimeError("MCP session not connected")
+            raise MCPConnectionError("MCP session not connected")
         result = await asyncio.wait_for(
             self._session.call_tool(name, arguments=arguments),
             timeout=self._timeout,
         )
         if result.isError:
             parts = [str(c) for c in result.content]
-            raise RuntimeError(f"MCP tool '{name}' error: {'; '.join(parts)}")
+            raise MCPConnectionError(f"MCP tool '{name}' error: {'; '.join(parts)}")
         parts = [str(c) for c in result.content]
         return "\n".join(parts)
 

@@ -5,6 +5,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal
 
+from air_agent.errors import ConfigurationError
 from air_agent.memory import MemoryStore
 from air_agent.tools.builtin.config import BuiltinToolsConfig
 
@@ -35,7 +36,7 @@ def _parse_bool(value: str) -> bool:
         return True
     if normalized in {"0", "false", "no", "off"}:
         return False
-    raise ValueError(f"Invalid boolean value: {value}")
+    raise ConfigurationError(f"Invalid boolean value: {value}")
 
 
 def _parse_mcp_server(data: dict[str, Any]) -> MCPServerStdio | MCPServerSSE:
@@ -50,7 +51,7 @@ def _parse_mcp_server(data: dict[str, Any]) -> MCPServerStdio | MCPServerSSE:
             url=data["url"],
             headers=data.get("headers"),
         )
-    raise ValueError(
+    raise ConfigurationError(
         f"Cannot determine MCP server type: need 'command' (stdio) or 'url' (sse), got keys {list(data.keys())}"
     )
 
@@ -87,9 +88,9 @@ class AgentConfig:
         if self.api_key is None:
             self.api_key = os.environ.get("OPENAI_API_KEY")
         if self.strategy not in {"react", "plan_execute"}:
-            raise ValueError("strategy must be one of: react, plan_execute")
+            raise ConfigurationError("strategy must be one of: react, plan_execute")
         if self.max_plan_steps < 1:
-            raise ValueError("max_plan_steps must be greater than 0")
+            raise ConfigurationError("max_plan_steps must be greater than 0")
 
     @classmethod
     def from_json(cls, path: str) -> AgentConfig:
@@ -100,11 +101,11 @@ class AgentConfig:
         builtin_raw = data.pop("builtin_tools", None)
         provider_raw = data.get("provider")
         if "provider" in data and provider_raw is not None and not isinstance(provider_raw, str):
-            raise ValueError("provider must be a string or null")
+            raise ConfigurationError("provider must be a string or null")
         if data.get("memory") is not None:
-            raise ValueError("memory must be configured programmatically")
+            raise ConfigurationError("memory must be configured programmatically")
         if data.get("planner") is not None:
-            raise ValueError("planner must be configured programmatically")
+            raise ConfigurationError("planner must be configured programmatically")
         field_names = {
             f.name
             for f in cls.__dataclass_fields__.values()

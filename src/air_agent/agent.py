@@ -10,6 +10,7 @@ from typing import Any, AsyncIterator, Callable, Literal
 from uuid import uuid4
 
 from air_agent.config import AgentConfig, SubagentConfig
+from air_agent.errors import ConfigurationError, ProviderError
 from air_agent.memory import MemoryRecord, filter_memory_records_for_scope, format_memory_context
 from air_agent.mcp.client import MCPClient
 from air_agent.planner import LLMPlanner, Plan, PlanContext, PlanStep, Planner, StepResult
@@ -296,7 +297,7 @@ class Agent:
         run_id = run_id or f"run_{uuid4().hex}"
         tools = self._registry.get_openai_tools() or None
         if tools and not getattr(self._provider, "supports_tools", False):
-            raise RuntimeError("Configured LLM provider does not support tool calling")
+            raise ProviderError("Configured LLM provider does not support tool calling")
         history: list[dict[str, Any]] = list(messages)
 
         for iteration in range(self.config.max_iterations):
@@ -732,9 +733,9 @@ class Agent:
     ) -> AsyncIterator[StreamEvent]:
         tools = self._registry.get_openai_tools() or None
         if not getattr(self._provider, "supports_streaming", False):
-            raise RuntimeError("Configured LLM provider does not support streaming")
+            raise ProviderError("Configured LLM provider does not support streaming")
         if tools and not getattr(self._provider, "supports_tools", False):
-            raise RuntimeError("Configured LLM provider does not support tool calling")
+            raise ProviderError("Configured LLM provider does not support tool calling")
         history: list[dict[str, Any]] = list(messages)
 
         async def _stream_generator():
@@ -1098,7 +1099,7 @@ def _build_provider(config: AgentConfig) -> Any:
             default_headers=config.default_headers,
         )
     if isinstance(provider, str):
-        raise ValueError(f"Unsupported provider: {provider}")
+        raise ConfigurationError(f"Unsupported provider: {provider}")
     return provider
 
 
