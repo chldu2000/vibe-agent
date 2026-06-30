@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from air_agent.tools.registry import ToolRegistry
+from air_agent.tools.builtin._permissions import PermissionDeniedError
 from air_agent.tools.builtin.config import BuiltinToolsConfig
 
 _ALL_TOOLS = [
@@ -32,3 +33,10 @@ def register_builtin_tools(
     for func, name, description in make_shell_tools(config):
         if name in selected:
             registry.register(func, name=name, description=description)
+
+
+__all__ = [
+    "BuiltinToolsConfig",
+    "PermissionDeniedError",
+    "register_builtin_tools",
+]

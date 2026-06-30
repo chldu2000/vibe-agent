@@ -1,6 +1,17 @@
 """Air Agent — lightweight AI agent library."""
 
 from air_agent.config import AgentConfig, MCPServerStdio, MCPServerSSE, SubagentConfig
+from air_agent.errors import (
+    AirAgentError,
+    ConfigurationError,
+    MCPConnectionError,
+    MemoryError,
+    PlannerError,
+    PluginLoadError,
+    ProviderError,
+    ToolExecutionError,
+    ToolPermissionError,
+)
 from air_agent.memory import FileMemoryStore, InMemoryMemoryStore, MemoryRecord, MemoryStore
 from air_agent.planner import (
     LLMPlanner,
@@ -13,7 +24,7 @@ from air_agent.planner import (
     StepResult,
     StepResultStatus,
 )
-from air_agent.plugins import PluginContext, PluginLoadError, PluginManifest
+from air_agent.plugins import PluginContext, PluginManifest
 from air_agent.providers import (
     LLMProvider,
     LLMResponse,
@@ -41,9 +52,12 @@ from air_agent.tools.builtin.config import BuiltinToolsConfig
 __all__ = [
     "Agent",
     "AgentConfig",
+    "AirAgentError",
     "AgentRole",
+    "ConfigurationError",
     "MCPServerStdio",
     "MCPServerSSE",
+    "MCPConnectionError",
     "SubagentConfig",
     "Response",
     "RunEvent",
@@ -62,10 +76,12 @@ __all__ = [
     "InMemoryMemoryStore",
     "MemoryRecord",
     "MemoryStore",
+    "MemoryError",
     "LLMPlanner",
     "Plan",
     "PlanContext",
     "Planner",
+    "PlannerError",
     "PlanStatus",
     "PlanStep",
     "PlanStepStatus",
@@ -74,10 +90,13 @@ __all__ = [
     "PluginContext",
     "PluginLoadError",
     "PluginManifest",
+    "ProviderError",
     "LLMToolCall",
     "LLMResponse",
     "LLMStreamToolCallDelta",
     "LLMStreamChunk",
     "LLMProvider",
     "OpenAIProvider",
+    "ToolExecutionError",
+    "ToolPermissionError",
 ]

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from air_agent.errors import ToolPermissionError
 from air_agent.tools.builtin.config import BuiltinToolsConfig
 
 
-class PermissionDeniedError(PermissionError):
+class PermissionDeniedError(ToolPermissionError):
     """Raised when a tool action violates sandbox restrictions."""
 
 

@@ -7,15 +7,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
+from air_agent.errors import PluginLoadError
 from air_agent.tools.registry import ToolRegistry
 
 
 PLUGIN_MANIFEST_NAME = "air-agent-plugin.json"
 _ALLOWED_CAPABILITIES = {"tools", "skills", "provider", "memory", "planner"}
-
-
-class PluginLoadError(RuntimeError):
-    pass
 
 
 @dataclass(slots=True)
