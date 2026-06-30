@@ -6,7 +6,7 @@ A lightweight Python AI Agent library with OpenAI as the default provider, plus 
 
 ## API Stability
 
-v1.0 marks `Agent`, `AgentConfig`, local tools, MCP config, Provider, Memory, Planner, tracing events, and public errors as Stable APIs. Plugins and advanced multi-agent arbitration remain Experimental. See [API Stability And Semver Policy](docs/api-stability.md).
+v1.0 marks `Agent`, `AgentConfig`, local tools, MCP config, Provider, Memory, Planner, tracing events, and public errors as Stable APIs. Plugins and advanced multi-agent arbitration remain Experimental. See [API Stability And Semver Policy](docs/api-stability.md), [Migration Guide](docs/migration-v1.0.md), and [v1.0 Release Notes](docs/releases/v1.0.md).
 
 ## Installation
 

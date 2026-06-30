@@ -6,7 +6,7 @@
 
 ## API 稳定性
 
-v1.0 将 `Agent`、`AgentConfig`、本地工具、MCP 配置、Provider、Memory、Planner、tracing 事件和公开错误标记为 Stable API。插件和高级多 Agent 仲裁仍为 Experimental。详见 [API Stability And Semver Policy](docs/api-stability.md)。
+v1.0 将 `Agent`、`AgentConfig`、本地工具、MCP 配置、Provider、Memory、Planner、tracing 事件和公开错误标记为 Stable API。插件和高级多 Agent 仲裁仍为 Experimental。详见 [API Stability And Semver Policy](docs/api-stability.md)、[Migration Guide](docs/migration-v1.0.md) 和 [v1.0 Release Notes](docs/releases/v1.0.md)。
 
 ## 安装
 

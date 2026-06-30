@@ -1,0 +1,9 @@
+{
+  "name": "example-tools",
+  "version": "1.0.0",
+  "description": "Example local air-agent plugin",
+  "entrypoint": "plugin:register",
+  "capabilities": ["tools"],
+  "permissions": {},
+  "metadata": {"stability": "example"}
+}
