@@ -238,6 +238,8 @@ agent = Agent(config)
 
 JSON 中 `mcp_servers` 根据 `command`（stdio）或 `url`（StreamableHTTP）自动识别类型。
 
+关于部署建议、Docker 示例和安全默认值，请参考 [Production Guide](docs/production.md)。
+
 ### 从环境变量加载配置
 
 ```bash

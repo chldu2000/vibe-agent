@@ -1,0 +1,7 @@
+{
+  "model": "gpt-4o",
+  "max_iterations": 10,
+  "enable_tracing": true,
+  "log_events": true,
+  "strategy": "react"
+}

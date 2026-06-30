@@ -238,6 +238,8 @@ agent = Agent(config)
 
 The `mcp_servers` field auto-detects the transport type based on `command` (stdio) or `url` (StreamableHTTP).
 
+For deployment guidance, Docker example, and security defaults, see [Production Guide](docs/production.md).
+
 ### Load Configuration from Environment Variables
 
 ```bash
