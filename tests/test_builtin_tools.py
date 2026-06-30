@@ -176,6 +176,18 @@ class TestWriteFile:
         assert "OK" in result
         assert (tmp_path / "sub" / "dir" / "file.txt").read_text() == "nested"
 
+    @pytest.mark.asyncio
+    async def test_write_outside_sandbox_raises_public_permission_error(self, tmp_path: Path):
+        cfg = BuiltinToolsConfig(allowed_directories=[str(tmp_path)])
+        registry = ToolRegistry()
+        register_builtin_tools(registry, cfg)
+
+        with pytest.raises(PermissionDeniedError, match="outside allowed"):
+            await registry.execute("write_file", json.dumps({
+                "path": "/tmp/outside-air-agent-test.txt",
+                "content": "blocked",
+            }))
+
 
 class TestListDirectory:
     @pytest.mark.asyncio

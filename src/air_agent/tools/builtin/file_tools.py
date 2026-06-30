@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Callable, Awaitable
 
 from air_agent.tools.builtin.config import BuiltinToolsConfig
-from air_agent.tools.builtin._permissions import resolve_and_check_path
+from air_agent.tools.builtin._permissions import PermissionDeniedError, resolve_and_check_path
 
 
 def make_file_tools(
@@ -39,7 +39,7 @@ def make_file_tools(
         if not any(
             _is_under(parent, base) or _is_under(resolved, base) for base in allowed
         ):
-            raise PermissionError(
+            raise PermissionDeniedError(
                 f"Path '{path}' is outside allowed directories: {[str(p) for p in allowed]}"
             )
         parent.mkdir(parents=True, exist_ok=True)
