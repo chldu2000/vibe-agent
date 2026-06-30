@@ -25,6 +25,10 @@ class MCPConnectionError(AirAgentError, RuntimeError):
     """Raised when an MCP connection fails."""
 
 
+class MCPToolError(ToolExecutionError):
+    """Raised when an MCP server reports a tool-level failure."""
+
+
 class PluginLoadError(AirAgentError, RuntimeError):
     """Raised when plugin loading fails."""
 
@@ -44,6 +48,7 @@ __all__ = [
     "ToolExecutionError",
     "ToolPermissionError",
     "MCPConnectionError",
+    "MCPToolError",
     "PluginLoadError",
     "MemoryError",
     "PlannerError",

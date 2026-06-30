@@ -1,4 +1,5 @@
 import pytest
+from types import SimpleNamespace
 
 from air_agent import (
     Agent,
@@ -7,6 +8,7 @@ from air_agent import (
     ConfigurationError,
     LLMResponse,
     MCPConnectionError,
+    MCPToolError,
     MemoryError,
     PlannerError,
     PluginLoadError,
@@ -14,6 +16,8 @@ from air_agent import (
     ToolExecutionError,
     ToolPermissionError,
 )
+from air_agent.config import MCPServerStdio
+from air_agent.mcp.client import MCPClient
 from air_agent.planner import LLMPlanner, PlanContext
 from air_agent.tools.builtin import PermissionDeniedError
 from air_agent.tools.registry import ToolRegistry
@@ -26,6 +30,7 @@ def test_public_error_hierarchy_is_exported():
     assert issubclass(ToolPermissionError, ToolExecutionError)
     assert issubclass(ToolPermissionError, PermissionError)
     assert issubclass(MCPConnectionError, AirAgentError)
+    assert issubclass(MCPToolError, ToolExecutionError)
     assert issubclass(PluginLoadError, AirAgentError)
     assert issubclass(MemoryError, AirAgentError)
     assert issubclass(PlannerError, AirAgentError)
@@ -91,3 +96,17 @@ async def test_registry_execute_unknown_still_raises_key_error():
     registry = ToolRegistry()
     with pytest.raises(KeyError, match="missing"):
         await registry.execute("missing", "{}")
+
+
+@pytest.mark.asyncio
+async def test_mcp_tool_error_is_not_connection_error():
+    class Session:
+        async def call_tool(self, name, arguments):
+            return SimpleNamespace(isError=True, content=["remote tool failed"])
+
+    client = MCPClient(MCPServerStdio(command="fake"))
+    client._session = Session()
+
+    with pytest.raises(MCPToolError, match="remote tool failed") as exc_info:
+        await client.call_tool("broken", {})
+    assert not isinstance(exc_info.value, MCPConnectionError)

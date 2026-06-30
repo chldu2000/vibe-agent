@@ -10,7 +10,7 @@ from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamable_http_client
 
 from air_agent.config import MCPServerStdio, MCPServerSSE
-from air_agent.errors import MCPConnectionError
+from air_agent.errors import MCPConnectionError, MCPToolError
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class MCPClient:
         )
         if result.isError:
             parts = [str(c) for c in result.content]
-            raise MCPConnectionError(f"MCP tool '{name}' error: {'; '.join(parts)}")
+            raise MCPToolError(f"MCP tool '{name}' error: {'; '.join(parts)}")
         parts = [str(c) for c in result.content]
         return "\n".join(parts)
 
